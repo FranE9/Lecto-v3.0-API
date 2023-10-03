@@ -1,0 +1,17 @@
+version: "3"
+services:
+  myapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    container_name: Lecto-Main3
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONOPTIMIZE=1
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 3096MB
