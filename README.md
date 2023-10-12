@@ -12,17 +12,27 @@ pip install -r requirements.txt
 ## Cosas que se instalarán
 
 ```
-pip install matplotlib==3.5.2
+pip install matplotlib==3.6.0
 pip install pytesseract==0.3.10
 pip install pdf2image==1.16.2
-pip install PyMuPDF
+pip install PyMuPDF==1.22.3
 pip install fpdf==1.7.2
 pip install syltippy==1.0
 pip install syllables
 pip install es-core-news-sm==3.1.0
-pip install fastapi
+pip install fastapi==0.95.2
 pip install python-multipart
-pip install uvicorn
+pip install uvicorn==0.22.0
+pip install spacy
+pip install python-multipart==0.0.6
+pip install pymongo==4.5.0
+pip install dnspython==2.4.2
+pip install passlib==1.7.4
+pip install cryptography==41.0.4
+pip install openpyxl==3.1.2
+pip install bcrypt==4.0.1
+pip install python-jose==3.3.0
+pip install pydantic
 
 python -m spacy download en_core_web_sm
 ```
@@ -66,5 +76,5 @@ deactivate
 ```
 docker compose up
 ```
--   Esperar a que se termine el proceso (toma entre 60-80 segundos)
+-   Esperar a que se termine el proceso (toma entre 100-140 segundos)
 -   En cualquier navegador irse a la ruta <a href='http://localhost:8080/lecto'>http://localhost:8080/lecto</a> o <a href='http://0.0.0.0:8080/lecto'>http://0.0.0.0:8080/lecto</a>
