@@ -18,14 +18,13 @@ pip install pdf2image==1.16.2
 pip install PyMuPDF==1.22.3
 pip install fpdf==1.7.2
 pip install syltippy==1.0
-pip install syllables
-pip install es-core-news-sm==3.1.0
+pip install syllables==1.0.7
+pip install es-core-news-sm
 pip install fastapi==0.95.2
-pip install python-multipart
+pip install python-multipart==0.0.6
 pip install uvicorn==0.22.0
 pip install spacy
-pip install python-multipart==0.0.6
-pip install pymongo==4.5.0
+pip install pymongo==3.12.3
 pip install dnspython==2.4.2
 pip install passlib==1.7.4
 pip install cryptography==41.0.4
@@ -33,6 +32,7 @@ pip install openpyxl==3.1.2
 pip install bcrypt==4.0.1
 pip install python-jose==3.3.0
 pip install pydantic
+beanie==1.8.10
 
 python -m spacy download en_core_web_sm
 ```
