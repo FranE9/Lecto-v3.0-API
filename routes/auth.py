@@ -8,10 +8,15 @@ router = APIRouter();
 
 @router.post('/register')
 async def create_user(request: User):
-	request.password = Hash.bcrypt(request.password)
-	user = await request.create()
-	# print(user)
-	return {"res":"created", "username": user.username}
+    user_found = await User.find_one({ "username":request.username })
+    if user_found:
+        raise HTTPException(
+                status_code=409, detail="User already exists")
+    request.password = Hash.bcrypt(request.password)
+    user = await request.create()
+    access_token = create_access_token(data={"sub": user.username })
+    return {"access_token": access_token, "token_type": "bearer"}
+    
 
 @router.post('/login')
 async def login(request:OAuth2PasswordRequestForm = Depends()):

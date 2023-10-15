@@ -32,7 +32,7 @@ pip install openpyxl==3.1.2
 pip install bcrypt==4.0.1
 pip install python-jose==3.3.0
 pip install pydantic
-beanie==1.8.10
+pip install beanie==1.8.10
 
 python -m spacy download en_core_web_sm
 ```
