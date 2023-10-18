@@ -149,11 +149,11 @@ def ValidacionPaginas(num1, num2, source):
     return False
 
 
-def CalculateEstimatedTime(num1, num2,source):
+def CalculateEstimatedTime(num1, num2,source) -> tuple[str, int]:
     X = num2-num1
     Y = round(0.39846153846153837*X -0.21999999999999859,0)
     if Y >=60.0:
         min = round(Y/60,0)
         seg = Y-min*60
-        return f"{min} min con {seg} s"
-    return f"{Y} segundos"
+        return f"{min} min con {seg} s", Y
+    return f"{Y} segundos", Y

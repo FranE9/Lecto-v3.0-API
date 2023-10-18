@@ -14,7 +14,7 @@ async def create_user(request: User):
                 status_code=409, detail="User already exists")
     request.password = Hash.bcrypt(request.password)
     user = await request.create()
-    access_token = create_access_token(data={"sub": user.username })
+    access_token = create_access_token(data={"username": user.username, "user_id": str(user.id) })
     return {"access_token": access_token, "token_type": "bearer"}
     
 
@@ -25,5 +25,5 @@ async def login(request:OAuth2PasswordRequestForm = Depends()):
 		raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail = f'No user found with this {request.username} username')
 	if not Hash.verify(user.password, request.password):
 		raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail = f'Wrong Username or password')
-	access_token = create_access_token(data={"sub": user.username })
+	access_token = create_access_token(data={"username": user.username, "user_id": str(user.id) })
 	return {"access_token": access_token, "token_type": "bearer"}
