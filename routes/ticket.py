@@ -54,3 +54,23 @@ async def create_ticket(ticket: Ticket = Body(...)):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Unexpected server error")
+
+@router.delete('/{id}', dependencies=[Depends(token_middleware)])
+async def delete_ticket_by_id(id: str):
+    try:
+        ticket = await Ticket.get(id)
+        if not ticket: 
+            raise HTTPException(status_code=404, detail="Ticket not found with id: {}".format(id))
+        else:
+            await ticket.delete()
+            return {
+                "status_code": 200,
+                "status": True,
+                "message": "Ticket deleted successfully",
+                "data": ticket
+            }
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Unexpected server error")
