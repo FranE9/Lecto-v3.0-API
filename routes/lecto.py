@@ -38,14 +38,19 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
         DeletePDF(Source)
         
         paragraphs = int(results["Parrafo"])
+        words = int(results["words"])
+        phrases = int(results["phrases"])
+        syllables = int(results["syllables"])
+
         spa_results = None
         eng_results = None
+
         
         if idioma == "spa":
             szigrisztPazos_INFLESZ = float(results["szigrisztPazos_INFLESZ"])
             fernandezHuerta = float(results["fernandezHuerta"])
             legibilidadMu = float(results["legibilidadMu"])
-            spa_results = SpaResults(paragraph=paragraphs, 
+            spa_results = SpaResults(
                                 szigriszt_pazos=szigrisztPazos_INFLESZ, 
                                 fernandez_huerta=fernandezHuerta, 
                                 readability=legibilidadMu)
@@ -53,7 +58,7 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
             fleshReadingEasy = float(results["fleshReadingEasy"])
             fogReading = float(results["fogReading"])
             smogReading = float(results["smogReading"])
-            eng_results = EngResults(paragraph=paragraphs,
+            eng_results = EngResults(
                                 flesch_reading_easy=fleshReadingEasy,
                                 fog_reading=fogReading,
                                 smog_reading=smogReading)
@@ -64,7 +69,12 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
                         language=idioma, 
                         spaResults=spa_results, 
                         engResults=eng_results, 
-                        user_id=user_id)
+                        user_id=user_id,
+                        paragraphs=paragraphs,
+                        words=words,
+                        phrases=phrases,
+                        syllables=syllables,
+                        )
         
         new_ticket = await ticket_service.create(my_ticket)
         return {
