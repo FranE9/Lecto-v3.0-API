@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
 from src.constants import *
 from src.Logic import *
-from models.ticket import Ticket, SpaResults, EngResults
+from models.ticket import Ticket, SpaResults, EngResults, ParagraphResults
 from middlewares.auth import JWTBearer
 import services.ticket as ticket_service
 from datetime import datetime
@@ -44,7 +44,6 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
 
         spa_results = None
         eng_results = None
-
         
         if idioma == "spa":
             szigrisztPazos_INFLESZ = float(results["szigrisztPazos_INFLESZ"])
@@ -74,6 +73,7 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
                         words=words,
                         phrases=phrases,
                         syllables=syllables,
+                        paragraphInfo=results["paragraphInfo"],    
                         )
         
         new_ticket = await ticket_service.create(my_ticket)

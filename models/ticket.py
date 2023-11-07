@@ -1,8 +1,7 @@
 from beanie import Document
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
-from models.user import User
 
 class EngResults(BaseModel):
     flesch_reading_easy: float
@@ -13,6 +12,20 @@ class SpaResults(BaseModel):
     szigriszt_pazos: float
     fernandez_huerta: float
     readability: float
+
+class ParagraphResults(BaseModel):
+    Parrafo: str
+    words: int
+    phrases: int
+    syllables: int
+    letters: int
+    Three_sillabls_words: int
+    fleshReadingEasy: Optional[str] = None
+    fogReading: Optional[str] = None
+    smogReading: Optional[str] = None
+    szigrisztPazos_INFLESZ: Optional[str] = None
+    fernandezHuerta: Optional[str] = None
+    legibilidadMu: Optional[str] = None
 
 class Ticket(Document):
     duration: int
@@ -25,5 +38,6 @@ class Ticket(Document):
     syllables: int
     spaResults: Optional[SpaResults] = None
     engResults: Optional[EngResults] = None
+    paragraphInfo: Optional[List[ParagraphResults]] = []
     user_id: str
     
