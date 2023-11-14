@@ -39,28 +39,19 @@ def ReadPDF(Pdf, First, Last):
 
 def Binarizacion(i):
     file_name = define_file_name(i[0])
-    text = str(pytesseract.image_to_string(Image.open(DOCS_ROUTE+'plt-'+file_name),lang=i[1],config='-c page_separator='' '))
+    text = str(pytesseract.image_to_string(Image.open(DOCS_ROUTE+'plt-'+file_name),config='-c page_separator='' '))
     text = text.replace('-\n', '')
     
     open(OUTPUT_TEXT, "a", encoding="utf-8").write(text)
 
-#Funcion para joinear la lista y el idioma
-def createTupla(Lista, Idioma):
-    TuplaList = []
-    for i in Lista:
-        Tupla = (i, Idioma)
-        TuplaList.append(Tupla)
-    return TuplaList
-
 #La imagen se convierte primero a escala de grises y luego se binariza para obtener mejores resultados
-def refine_image(Lista, Idioma_traido):
-    Count = 1
+def refine_image(Lista):
     Aux = []
     var = 1
         
     for i in range(len(Lista)):
         Aux.append(var)
-        Binarizacion([var, Idioma_traido])
+        Binarizacion([var])
         var+=1
     open(OUTPUT_TEXT, "a", encoding="utf-8").close()
 

@@ -30,11 +30,12 @@ def process_file(Param):
     #Crea imagenes PDF
     ReadPDF(Param[0], Param[1], Param[2])
     #Binarizacion y extraccion de texto de pdf
-    refine_image(Lista, Param[3])
+    refine_image(Lista)
+    # Param[3] = Idioma
     #Borra imagenes creadas de PDF
     delete_files(Param[1], Param[2])
     #Escribe resultados 
-    return WriteResults(Param[3])
+    return WriteResults()
 
 def languageValidation(idioma):
     return idioma != "es" and idioma != "en"

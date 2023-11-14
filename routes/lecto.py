@@ -11,14 +11,11 @@ router = APIRouter()
 token_middleware = JWTBearer()
 
 @router.post("/pdf", dependencies=[Depends(token_middleware)])
-async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...), final: int= Form(...), idioma:str=Form(...), user_id:str=Form(...)):
+async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...), final: int= Form(...), user_id:str=Form(...)):
     Validation_Result()
 
     if not archivo_pdf.filename:
         raise HTTPException(status_code=400, detail="Se requiere un archivo PDF")
-
-    if languageValidation(idioma):
-        raise HTTPException(status_code=400, detail="Solo se acepta el idioma español (spa) o inglés (eng)")
 
     if pageValidation(inicio,final):
         raise HTTPException(status_code=400, detail="La primer página debe de ser menor que la última")
@@ -34,7 +31,7 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
     try:
         #Tiempo estimado
         _, time = CalculateEstimatedTime(inicio,final, Source)
-        results = process_file([Source, inicio, final, idioma])
+        results = process_file([Source, inicio, final])
         DeletePDF(Source)
         
         paragraphs = int(results["Parrafo"])
@@ -44,8 +41,10 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
 
         spa_results = None
         eng_results = None
+
+        language = results["language"]
         
-        if idioma == "spa":
+        if language == "es":
             szigrisztPazos_INFLESZ = float(results["szigrisztPazos_INFLESZ"])
             fernandezHuerta = float(results["fernandezHuerta"])
             legibilidadMu = float(results["legibilidadMu"])
@@ -65,7 +64,7 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
         my_ticket = Ticket(duration=time, 
                         date=datetime.now(), 
                         file=f"{archivo_pdf.filename}", 
-                        language=idioma, 
+                        language=language, 
                         spaResults=spa_results, 
                         engResults=eng_results, 
                         user_id=user_id,
