@@ -13,13 +13,6 @@ import datetime
 
 current_date = ''
 
-def WriteResults(Idioma):
-    if Idioma == 'spa':
-        return Spa()
-    if Idioma == 'eng':
-        return Eng()
-    
-    
 def CreateRange(Param):
     Lista = []
     for i in range(Param[1],Param[2]+1):
@@ -44,10 +37,7 @@ def process_file(Param):
     return WriteResults(Param[3])
 
 def languageValidation(idioma):
-    if idioma != "spa" and idioma != "eng":
-        return True
-    else:
-        return False
+    return idioma != "es" and idioma != "en"
 
 def pageValidation(num1,num2):
     if num1 and num2 > 0:
@@ -59,16 +49,15 @@ def DeletePDF(Loc):
     os.remove(Loc)
 
 
-def process_text(Text, Idioma):
+def process_text(Text):
     try:
         #Limpia archivos auxiliares TXT
         clean_file()
         #Pasa el texto en el output_text
         open(OUTPUT_TEXT, "a", encoding="utf-8").write(Text)
-        return WriteResults(Idioma)
+        return WriteResults()
     except:
         raise HTTPException(status_code=400, detail=f"Ingrese un texto más largo")
-        return ""
 
 
 def FindTicket(ticket):

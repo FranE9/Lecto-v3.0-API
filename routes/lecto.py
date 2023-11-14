@@ -88,7 +88,7 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
         raise HTTPException(status_code=500, detail="Unexpected server error")
 
 @router.post("/text", dependencies=[Depends(token_middleware)])
-async def received_Text(Texto: str = Form(), Idioma:str = Form()):
-    Result = process_text(Texto, Idioma)
+async def received_Text(Texto: str = Form()):
+    Result = process_text(Texto)
     Result["id"] = str(datetime.now().timestamp() * 1000).replace('.','')
     return Result
