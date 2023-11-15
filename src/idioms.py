@@ -78,7 +78,7 @@ def GenerateJson(language, total_values, values, result):
         json[FERNANDEZHUERTA_TEXT] = str(calculate_average(values["fernandez_huerta"] or []))
         json[MULEGIBILITY_VAR_TEXT] = str(calculate_average(values["mu_legibility"] or []))
     else:
-        json[FLESH_TEXT] = str(calculate_average(values["flesh"] or [])),
+        json[FLESH_TEXT] = str(calculate_average(values["flesh"] or []))
         json[FOG_TEXT] = str(calculate_average(values["fog"] or []))
         json[SMOG_TEXT] = str(calculate_average(values["smog"] or []))
     return json
