@@ -26,6 +26,7 @@ class ParagraphResults(BaseModel):
     szigrisztPazos_INFLESZ: Optional[str] = None
     fernandezHuerta: Optional[str] = None
     legibilidadMu: Optional[str] = None
+    content: str
 
 class Ticket(Document):
     duration: int

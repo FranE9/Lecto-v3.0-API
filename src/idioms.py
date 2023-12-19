@@ -59,7 +59,7 @@ def WriteResults():
             value = f'{index}{csvSeparator}{flesh_result}{csvSeparator}{fog_result}{csvSeparator}{smog_result}'
 
         Text = spanish_text if language == "es" else english_text
-        final_result.append({ **dict(zip(Text.split(';'), value.split(';'))), **perspicuity_values, 'letters': sum(letters_counter) })
+        final_result.append({ **dict(zip(Text.split(';'), value.split(';'))), **perspicuity_values, 'letters': sum(letters_counter), "content": pharagraph })
 
     values = spa_values if language == "es" else eng_values
     return GenerateJson(language, total_values, values, final_result)
