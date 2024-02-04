@@ -4,7 +4,10 @@ from src.Logic import *
 from models.ticket import Ticket, SpaResults, EngResults, ParagraphResults
 from middlewares.auth import JWTBearer
 import services.ticket as ticket_service
+import services.user as user_service
 from datetime import datetime
+import asyncio
+from smtplib import SMTP
 
 router = APIRouter()
 
@@ -31,9 +34,41 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
     try:
         #Tiempo estimado
         _, time = CalculateEstimatedTime(inicio,final, Source)
-        results = process_file([Source, inicio, final])
-        DeletePDF(Source)
+
+        process_task  = asyncio.create_task(process_file([Source, inicio, final]))
+
+        my_ticket = None
+
+        try:
+            await asyncio.wait_for(process_task, 2)
+        except (asyncio.TimeoutError, asyncio.CancelledError):
+            user_found = await user_service.get_user_by_id(user_id)
+
+            if user_found["error"]:
+                raise HTTPException(status_code=404, detail=user_found["message"])
+
+            my_ticket = Ticket(duration=time, 
+                            date=datetime.now(), 
+                            file=f"{archivo_pdf.filename}", 
+                            user_id=user_id,
+                            pending=True
+                            ) 
+            new_ticket = await ticket_service.create(my_ticket)
+            
+            email_task = asyncio.create_task(send_email(user_found["email"], f"[LECTO] Creación de ticket {new_ticket._id} en proceso", "Una vez el ticket termine de procesar, se enviará un correo con la confirmación."))
+
+            await asyncio.gather(email_task)
+
+            return {
+                    "status_code": 200,
+                    "status": True,
+                    "message": "Ticket in progress",
+                    "data": new_ticket
+                }
         
+        DeletePDF(Source)
+        results = process_task.result()
+
         paragraphs = int(results["Parrafo"])
         words = int(results["words"])
         phrases = int(results["phrases"])
@@ -61,21 +96,29 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
                                 fog_reading=fogReading,
                                 smog_reading=smogReading)
             
-        my_ticket = Ticket(duration=time, 
-                        date=datetime.now(), 
-                        file=f"{archivo_pdf.filename}", 
-                        language=language, 
-                        spaResults=spa_results, 
-                        engResults=eng_results, 
-                        user_id=user_id,
-                        paragraphs=paragraphs,
-                        words=words,
-                        phrases=phrases,
-                        syllables=syllables,
-                        paragraphInfo=results["paragraphInfo"],    
+        if my_ticket is None:
+            my_ticket = Ticket(language=language, 
+                            spaResults=spa_results, 
+                            engResults=eng_results, 
+                            paragraphs=paragraphs,
+                            words=words,
+                            phrases=phrases,
+                            syllables=syllables,
+                            paragraphInfo=results["paragraphInfo"],    
+                            duration=time, 
+                            date=datetime.now(), 
+                            file=f"{archivo_pdf.filename}", 
+                            user_id=user_id,
+                            pending=False
                         )
+            new_ticket = await ticket_service.create(my_ticket)
+        else:
+            new_ticket = await ticket_service.update(my_ticket._id, language, paragraphs, words, phrases, syllables, spa_results, eng_results, results["paragraphInfo"])
         
-        new_ticket = await ticket_service.create(my_ticket)
+        email_task = asyncio.create_task(send_email(user_found["email"], f"[LECTO] Creación de ticket {new_ticket._id} finalizada", f"Ticket {new_ticket._id} ya está listo para ser consultado."))
+
+        await asyncio.gather(email_task)
+
         return {
             "status_code": 200,
             "status": True,
@@ -91,3 +134,15 @@ async def received_Text(Texto: str = Form()):
     Result = process_text(Texto)
     Result["id"] = str(datetime.now().timestamp() * 1000).replace('.','')
     return Result
+
+async def send_email(receiver_email: str, subject: str, body: str):
+    try:
+        email = "lectov3.2024@gmail.com"
+        text = f"Subject: {subject}\n\n{body}"
+        server = SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(email, "ytfmskwmperussmm")
+        server.sendmail(email, receiver_email, text)
+        return True
+    except Exception as e:
+        return False

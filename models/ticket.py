@@ -29,16 +29,17 @@ class ParagraphResults(BaseModel):
     content: str
 
 class Ticket(Document):
-    duration: int
-    date: datetime
-    file: str
-    language: str
-    paragraphs: int
-    words: int
-    phrases: int
-    syllables: int
+    duration: int = None
+    date: datetime 
+    file: str = None
+    language: str = None
+    paragraphs: int = None
+    words: int = None
+    phrases: int = None
+    syllables: int = None
     spaResults: Optional[SpaResults] = None
     engResults: Optional[EngResults] = None
     paragraphInfo: Optional[List[ParagraphResults]] = []
-    user_id: str
+    user_id: str = None
+    pending: bool = True
     

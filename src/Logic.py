@@ -9,6 +9,7 @@ from src.idioms import *
 from fastapi import HTTPException
 import os 
 import datetime
+import asyncio
 
 
 current_date = ''
@@ -27,15 +28,24 @@ def process_file(Param):
     clean_file()
     #Obtiene conteo desde donde comenzar a contar en PDF
     Lista = CreateRange(Param)
+
     #Crea imagenes PDF
+    #await asyncio.to_thread(ReadPDF, Param[0], Param[1], Param[2])
     ReadPDF(Param[0], Param[1], Param[2])
+
     #Binarizacion y extraccion de texto de pdf
+    #await asyncio.to_thread(refine_image, Lista)
+
     refine_image(Lista)
     # Param[3] = Idioma
+
     #Borra imagenes creadas de PDF
     delete_files(Param[1], Param[2])
+    #await asyncio.to_thread(delete_files, Param[1], Param[2])
+
     #Escribe resultados 
-    return WriteResults()
+    #return WriteResults()
+    return asyncio.to_thread(WriteResults)
 
 def languageValidation(idioma):
     return idioma != "es" and idioma != "en"
