@@ -32,32 +32,37 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
         raise HTTPException(status_code=400, detail="No puede poner paginas que sean mayores a las del PDF")
 
     try:
+        my_ticket = None
+        shielded_task = None
+        user_found = await user_service.get_user_by_id(user_id)
+        
+        if user_found["error"]:
+            raise HTTPException(status_code=404, detail=user_found["message"])
+        
         #Tiempo estimado
         _, time = CalculateEstimatedTime(inicio,final, Source)
-
+        
         process_task  = asyncio.create_task(process_file([Source, inicio, final]))
-
-        my_ticket = None
-
+        
         try:
-            await asyncio.wait_for(process_task, 2)
+            await asyncio.wait_for(process_task, 1)
         except (asyncio.TimeoutError, asyncio.CancelledError):
-            user_found = await user_service.get_user_by_id(user_id)
-
-            if user_found["error"]:
-                raise HTTPException(status_code=404, detail=user_found["message"])
+            print("Asyncio error")
 
             my_ticket = Ticket(duration=time, 
                             date=datetime.now(), 
                             file=f"{archivo_pdf.filename}", 
                             user_id=user_id,
-                            pending=True
+                            pending=True,
+                            language="-"
                             ) 
             new_ticket = await ticket_service.create(my_ticket)
             
-            email_task = asyncio.create_task(send_email(user_found["email"], f"[LECTO] Creación de ticket {new_ticket._id} en proceso", "Una vez el ticket termine de procesar, se enviará un correo con la confirmación."))
+            email_task = asyncio.create_task(send_email(user_found["email"], f"[LECTO] Creacion de ticket {new_ticket.id} en proceso", "Una vez el ticket termine de procesar, se enviara un correo con la confirmacion."))
 
             await asyncio.gather(email_task)
+            
+            shielded_task = asyncio.shield(process_task)
 
             return {
                     "status_code": 200,
@@ -66,9 +71,12 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
                     "data": new_ticket
                 }
         
+        print("La tarea continua")
+        process_task  = asyncio.create_task(process_file([Source, inicio, final]))
+        results = await shielded_task
+        
         DeletePDF(Source)
-        results = process_task.result()
-
+        
         paragraphs = int(results["Parrafo"])
         words = int(results["words"])
         phrases = int(results["phrases"])
@@ -113,9 +121,10 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
                         )
             new_ticket = await ticket_service.create(my_ticket)
         else:
-            new_ticket = await ticket_service.update(my_ticket._id, language, paragraphs, words, phrases, syllables, spa_results, eng_results, results["paragraphInfo"])
+            update_ticket = await ticket_service.update(my_ticket.id, language, paragraphs, words, phrases, syllables, spa_results, eng_results, results["paragraphInfo"])
+            new_ticket = update_ticket["ticket"]
         
-        email_task = asyncio.create_task(send_email(user_found["email"], f"[LECTO] Creación de ticket {new_ticket._id} finalizada", f"Ticket {new_ticket._id} ya está listo para ser consultado."))
+        email_task = asyncio.create_task(send_email(user_found["email"], f"[LECTO] Creacion de ticket {new_ticket.id} finalizada", f"Ticket {new_ticket.id} ya esta listo para ser consultado."))
 
         await asyncio.gather(email_task)
 
@@ -126,6 +135,7 @@ async def upload_file(archivo_pdf: UploadFile = File(...), inicio: int= Form(...
             "data": new_ticket
         }
     except Exception as e:
+        print("Exception error")
         print(e)
         raise HTTPException(status_code=500, detail="Unexpected server error")
 
@@ -143,6 +153,8 @@ async def send_email(receiver_email: str, subject: str, body: str):
         server.starttls()
         server.login(email, "ytfmskwmperussmm")
         server.sendmail(email, receiver_email, text)
+        print("Correo enviado con exito")
         return True
     except Exception as e:
+        print(f"Send email error: {e}")
         return False
