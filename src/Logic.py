@@ -44,8 +44,8 @@ def process_file(Param):
     #await asyncio.to_thread(delete_files, Param[1], Param[2])
 
     #Escribe resultados 
-    #return WriteResults()
-    return asyncio.to_thread(WriteResults)
+    return WriteResults()
+    #return asyncio.to_thread(WriteResults)
 
 def languageValidation(idioma):
     return idioma != "es" and idioma != "en"
